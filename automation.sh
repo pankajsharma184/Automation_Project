@@ -41,3 +41,23 @@ timestamp=$(date "+%d.%m.%Y-%H.%M.%S")
 
 sudo tar -cvf /tmp/$myname-$LogTypes-$timestamp.$Type /var/log/apache2/*.log
 sudo aws s3 cp /tmp/$myname-$LogTypes-$timestamp.$Type s3://$s3_bucket
+
+Size=$(du -h /tmp/$myname-$LogTypes-$timestamp.$Type | awk {'print $1'})
+
+if [[ -f "/var/www/html/inventory.html" ]]
+then
+    echo "Inventory.HTML file exists on your filesystem."
+else
+	echo "Log Type		Time Created			Type		Size" >> /var/www/html/inventory.html
+
+fi
+
+echo -e "$LogTypes		$timestamp		$Type		$Size" >> /var/www/html/inventory.html
+
+if [[ -f "/etc/cron.d/automation" ]]
+then
+    echo "Cron Job file exists on your filesystem."
+else
+       echo "* 23 * * * root /root/Automation_Project/automation.sh >> /root/Automation_Project/automation.logs" >> /etc/cron.d/automation
+       echo "Cron Job created sucessfully"
+fi
